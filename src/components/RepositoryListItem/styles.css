@@ -1,0 +1,11 @@
+.respository_list_item_wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0px;
+  cursor: pointer;
+}
+
+.repository_name {
+  font-size: 14px;
+  font-weight: bold;
+}

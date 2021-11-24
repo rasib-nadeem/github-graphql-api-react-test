@@ -1,0 +1,10 @@
+.issues_list_item_wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0px;
+}
+
+.issue_name {
+  font-size: 14px;
+  font-weight: bold;
+}

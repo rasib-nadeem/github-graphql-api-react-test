@@ -1,0 +1,51 @@
+.user_card_wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem 0px 2rem 0px;
+}
+
+.user_card {
+  display: flex;
+  width: 100px;
+  height: 100px;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: white;
+  box-shadow: 5px 10px;
+  margin: 0px 10px 0px 10px;
+  transition: all 0.3s ease-out;
+}
+.user_card_selected {
+  display: flex;
+  width: 100px;
+  height: 100px;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid dodgerblue;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: white;
+  margin: 0px 10px 0px 10px;
+  box-shadow: 5px 10px dodgerblue;
+  transition: all 0.3s ease-in;
+}
+
+.user_name {
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.user_name_selected {
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 10px;
+  text-align: center;
+  color: dodgerblue;
+}
