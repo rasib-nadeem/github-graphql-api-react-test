@@ -29,7 +29,7 @@ const GithubAccessTokenModal = ({ visible, setVisible }) => {
               type="text"
               value={token}
               onChange={(e) => setToken(e.target.value)}
-              placeholder="Title"
+              placeholder="Your github access token"
               className="title_input"
             />
           </Col>
