@@ -54,31 +54,37 @@ const App = () => {
   const [error, setError] = useState(false);
 
   const handleUserCardClick = async (e, item) => {
-    setShowError(false);
-    e.preventDefault();
-    if (item.name === null) {
-      setError("Failed to load user's data");
-      return setShowError(true);
-    }
-    setSelectedUser(item);
-    setRepo(null);
-    let name = item.name.includes(" ")
-      ? item.name.split(" ").join("")
-      : item.name;
-    setLoading(true);
-    const { data, error } = await client.query({
-      query: GetUserRepos,
-      variables: {
-        ownerName: name,
-      },
-    });
-    setLoading(false);
-    if (error) {
+    try {
+      setShowError(false);
+      e.preventDefault();
+      if (item.name === null) {
+        setError("Failed to load user's data");
+        return setShowError(true);
+      }
+      setSelectedUser(item);
+      setRepo(null);
+      let name = item.name.includes(" ")
+        ? item.name.split(" ").join("")
+        : item.name;
+      setLoading(true);
+      const { data, error } = await client.query({
+        query: GetUserRepos,
+        variables: {
+          ownerName: name,
+        },
+      });
+      setLoading(false);
+      if (error) {
+        setShowError(true);
+        return setError("Failed to load repos");
+      }
+      setRepositoriesList(data.user.repositories.nodes.map((repo) => repo));
+      setShowRepositories(true);
+    } catch (error) {
+      setError("Failed to load Users data");
       setShowError(true);
-      return setError("Failed to load repos");
+      setLoading(false);
     }
-    setRepositoriesList(data.user.repositories.nodes.map((repo) => repo));
-    setShowRepositories(true);
   };
 
   const SearchUser = async (e) => {
@@ -99,27 +105,33 @@ const App = () => {
   };
 
   const handleRepoClick = async (repo) => {
-    setShowError(false);
-    setShowRepositories(false);
-    setSelectedRepo(repo);
-    setRepo(repo.id);
-    let name = selectedUser.name.includes(" ")
-      ? selectedUser.name.split(" ").join("")
-      : selectedUser.name;
-    setLoading(true);
-    const { data, error } = await client.query({
-      query: GetRepoIssuesQuery,
-      variables: {
-        repoName: repo.name,
-        ownerName: name,
-      },
-    });
-    if (error) {
+    try {
+      setShowError(false);
+      setShowRepositories(false);
+      setSelectedRepo(repo);
+      setRepo(repo.id);
+      let name = selectedUser.name.includes(" ")
+        ? selectedUser.name.split(" ").join("")
+        : selectedUser.name;
+      setLoading(true);
+      const { data, error } = await client.query({
+        query: GetRepoIssuesQuery,
+        variables: {
+          repoName: repo.name,
+          ownerName: name,
+        },
+      });
+      if (error) {
+        setShowError(true);
+        return setError("Failed to load issues");
+      }
+      setLoading(false);
+      setIssues(data.repository.issues.nodes.map((issue) => issue));
+    } catch (error) {
       setShowError(true);
-      return setError("Failed to load issues");
+      setError("Failed to load the repos of this user");
+      setLoading(false);
     }
-    setLoading(false);
-    setIssues(data.repository.issues.nodes.map((issue) => issue));
   };
 
   return (
