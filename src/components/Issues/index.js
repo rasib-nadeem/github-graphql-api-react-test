@@ -19,6 +19,8 @@ const Issues = ({
   setRepo,
   setShowRepositories,
   issuePagination,
+  setIssuePagination,
+  handleRepoClick,
 }) => {
   const [createIssue] = useMutation(CreateIssueQuery);
   const [visible, setVisible] = useState(false);
@@ -84,16 +86,18 @@ const Issues = ({
           No Issues
         </h3>
       ) : (
-        issues.map((item) => {
-          return (
-            <IssuesListItem
-              key={item.id}
-              issue={item.title}
-              days={handleDays(moment(item.publishedAt))}
-              by={item.by}
-            />
-          );
-        })
+        issues
+          .slice((issuePagination.current - 1) * 5, issuePagination.current * 5)
+          .map((item) => {
+            return (
+              <IssuesListItem
+                key={item.id}
+                issue={item.title}
+                days={handleDays(moment(item.publishedAt))}
+                by={item.by}
+              />
+            );
+          })
       )}
       <AddIssueModal
         title={title}
@@ -110,8 +114,27 @@ const Issues = ({
         hasNext={issuePagination?.hasNext}
         hasPrev={issuePagination?.hasPrev}
         current={issuePagination?.current}
-        prev={issuePagination?.prev}
-        next={issuePagination?.next}
+        onPrevClick={async () => {
+          await setIssuePagination((prevState) => {
+            return {
+              ...prevState,
+              current:
+                prevState.current > 1
+                  ? prevState.current - 1
+                  : prevState.current,
+              hasPrev: prevState.current > 1 ? true : false,
+            };
+          });
+        }}
+        onNextClick={async () => {
+          await setIssuePagination((prevState) => {
+            return {
+              ...prevState,
+              current: prevState.current + 1,
+            };
+          });
+          handleRepoClick(selectedRepo, true);
+        }}
       />
     </>
   );

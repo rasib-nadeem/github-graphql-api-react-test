@@ -1,28 +1,27 @@
-import React, { useState, useEffect } from "react";
 import {
   ApolloClient,
-  InMemoryCache,
-  createHttpLink,
   ApolloProvider,
+  createHttpLink,
+  InMemoryCache,
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
-
+import React, { useEffect, useState } from "react";
 import {
+  GetRepoIssuesQuery,
+  GetUserRepos,
+  SearchUsersQuery,
+} from "../src/graphql/Queries";
+import "./App.css";
+import {
+  ActivityIndicator,
+  GithubAccessToken,
   Issues,
   Label,
+  Paginator,
   Repositries,
   SearchBar,
   UserCard,
-  ActivityIndicator,
-  Paginator,
-  GithubAccessToken,
 } from "./components";
-import "./App.css";
-import {
-  SearchUsersQuery,
-  GetUserRepos,
-  GetRepoIssuesQuery,
-} from "../src/graphql/Queries";
 
 const App = () => {
   const [visible, setVisible] = useState(false);
@@ -49,27 +48,19 @@ const App = () => {
   const [selectedUser, setSelectedUser] = useState();
   const [repositoriesList, setRepositoriesList] = useState([]);
   const [repo, setRepo] = useState();
-  const [userPageInfo, setUserPageInfo] = useState({});
-
   const [userPagination, setUserPagination] = useState({
     hasPrev: false,
-    prev: 0,
     current: 1,
-    next: 2,
     hasNext: false,
   });
   const [repoPagination, setRepoPagination] = useState({
     hasPrev: false,
-    prev: 0,
-    current: 0,
-    next: 1,
+    current: 1,
     hasNext: false,
   });
   const [issuePagination, setIssuePagination] = useState({
     hasPrev: false,
-    prev: 0,
-    current: 0,
-    next: 1,
+    current: 1,
     hasNext: false,
   });
 
@@ -93,25 +84,22 @@ const App = () => {
   const resetPaginations = () => {
     setRepoPagination({
       hasPrev: false,
-      prev: 0,
-      current: 0,
-      next: 1,
+      current: 1,
       hasNext: false,
     });
     setIssuePagination({
       hasPrev: false,
-      prev: 0,
-      current: 0,
-      next: 1,
+      current: 1,
       hasNext: false,
     });
   };
 
-  const handleUserCardClick = async (e, item) => {
+  const handleUserCardClick = async (item, nextCLicked) => {
     try {
-      resetPaginations();
+      if (!nextCLicked) {
+        resetPaginations();
+      }
       setShowError(false);
-      e.preventDefault();
       if (item.name === null) {
         setError("Failed to load user's data");
         return setShowError(true);
@@ -126,28 +114,19 @@ const App = () => {
         query: GetUserRepos,
         variables: {
           ownerName: name,
-          first:
-            userPagination.current === 0
-              ? userPagination.current + 1 * 5
-              : userPagination.current * 5,
+          first: nextCLicked
+            ? (repoPagination.current + 1) * 5
+            : repoPagination.current * 5,
         },
       });
       setLoading(false);
+      setRepositoriesList(data.user.repositories.nodes.map((repo) => repo));
       const { pageInfo } = data.user.repositories;
-
-      const list = data.user.repositories.nodes.map((repo) => repo);
-      setRepositoriesList(
-        list.slice(repoPagination.prev * 5, repoPagination.current + 1 * 5)
-      );
       setRepoPagination((prevState) => {
         return {
           hasNext: pageInfo.hasNextPage,
-          current: pageInfo.hasNextPage
-            ? prevState.current + 1
-            : prevState.current,
-          hasPrev: prevState + 1 > 1 ? true : false,
-          prev: pageInfo.hasNextPage ? prevState.prev + 1 : prevState.prev,
-          next: pageInfo.hasNextPage ? prevState.next + 1 : prevState.next,
+          current: prevState.current,
+          hasPrev: prevState.current > 1 ? true : false,
         };
       });
       setShowRepositories(true);
@@ -159,13 +138,11 @@ const App = () => {
     }
   };
 
-  const SearchUser = async (name, nextCLicked, prevClicked) => {
+  const SearchUser = async (name, nextCLicked) => {
     if (!nextCLicked) {
       setUserPagination({
         hasPrev: false,
-        prev: 0,
         current: 1,
-        next: 2,
         hasNext: false,
       });
     }
@@ -177,52 +154,35 @@ const App = () => {
       query: SearchUsersQuery,
       variables: {
         name: name,
-        first: userPagination.current * 5,
+        first: nextCLicked
+          ? (userPagination.current + 1) * 5
+          : userPagination.current * 5,
       },
     });
     setLoading(false);
     const { pageInfo } = data.search;
-    setUserPageInfo(pageInfo);
 
     const userList = data.search.nodes.map((user) => user);
 
-    const pageNumber = userPagination.current;
-    const pageSize = 5;
-
-    const slicedData = userList.slice(
-      (pageNumber - 1) * pageSize,
-      pageNumber * pageSize
-    );
-    setUsers(slicedData);
-    if (!prevClicked) {
-      setUserPagination((prevState) => {
-        return {
-          hasNext: pageInfo.hasNextPage,
-          current: pageInfo.hasNextPage
-            ? prevState.current + 1
-            : prevState.current,
-          hasPrev: false,
-          prev: pageInfo.hasNextPage ? prevState.prev + 1 : prevState.prev,
-          next: pageInfo.hasNextPage ? prevState.next + 1 : prevState.next,
-        };
-      });
-    }
-    if (userPagination.current === 1) {
-      setUserPagination((prevState) => {
-        return {
-          hasNext: pageInfo.hasNextPage,
-          current: prevState.current,
-          hasPrev: true,
-          prev: pageInfo.hasNextPage ? prevState.prev + 1 : prevState.prev,
-          next: pageInfo.hasNextPage ? prevState.next + 1 : prevState.next,
-        };
-      });
-    }
+    setUsers(userList);
+    setUserPagination((prevState) => {
+      return {
+        hasNext: pageInfo.hasNextPage,
+        current: prevState.current,
+        hasPrev: prevState.current > 1 ? true : false,
+      };
+    });
   };
 
-  const handleRepoClick = async (repo) => {
+  const handleRepoClick = async (repo, nextClicked) => {
     try {
-      resetPaginations();
+      if (!nextClicked) {
+        setIssuePagination({
+          hasPrev: false,
+          current: 1,
+          hasNext: false,
+        });
+      }
       setShowError(false);
       setShowRepositories(false);
       setSelectedRepo(repo);
@@ -236,24 +196,21 @@ const App = () => {
         variables: {
           repoName: repo.name,
           ownerName: name,
+          first: nextClicked
+            ? (issuePagination.current + 1) * 5
+            : issuePagination.current * 5,
         },
       });
 
       const { pageInfo } = data.repository.issues;
       const list = data.repository.issues.nodes.map((issue) => issue);
-      setIssues(
-        list.slice(issuePagination.prev * 5, issuePagination.current + 1 * 5)
-      );
+      setIssues(list);
 
       setIssuePagination((prevState) => {
         return {
           hasNext: pageInfo.hasNextPage,
-          current: pageInfo.hasNextPage
-            ? prevState.current + 1
-            : prevState.current,
-          hasPrev: false,
-          prev: pageInfo.hasNextPage ? prevState.prev + 1 : prevState.prev,
-          next: pageInfo.hasNextPage ? prevState.next + 1 : prevState.next,
+          current: prevState.current,
+          hasPrev: prevState.current > 1 ? true : false,
         };
       });
 
@@ -271,7 +228,7 @@ const App = () => {
         <SearchBar
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          onClick={() => SearchUser(search, false, true)}
+          onClick={() => SearchUser(search, false)}
         />
         <ActivityIndicator visible={loading} />
         {showError && <h3 className="error_field">{error}</h3>}
@@ -279,39 +236,46 @@ const App = () => {
           <>
             <Label title="Users" />
             <div className="user_list_container">
-              {users.map((item) => {
-                return (
-                  <UserCard
-                    selected={selectedUser?.id === item.id}
-                    avatar={item.avatarUrl}
-                    onClick={(e) => handleUserCardClick(e, item)}
-                    userName={item.name === null ? "No Name" : item.name}
-                  />
-                );
-              })}
+              {users
+                .slice(
+                  (userPagination.current - 1) * 5,
+                  userPagination.current * 5
+                )
+                .map((item) => {
+                  return (
+                    <UserCard
+                      selected={selectedUser?.id === item.id}
+                      avatar={item.avatarUrl}
+                      onClick={() => handleUserCardClick(item, false)}
+                      userName={item.name === null ? "No Name" : item.name}
+                    />
+                  );
+                })}
             </div>
             <Paginator
               hasNext={userPagination?.hasNext}
               hasPrev={userPagination?.hasPrev}
               current={userPagination?.current}
-              prev={userPagination?.prev}
-              next={userPagination?.next}
               onPrevClick={async () => {
-                await setUserPagination((prev) => {
-                  let newState = prev;
-                  console.log({ previous: newState.prev });
+                await setUserPagination((prevState) => {
                   return {
-                    hasPrev: newState.prev > 0 ? false : true,
-                    prev: newState.prev - 1,
-                    current: newState.current - 1,
-                    next: newState.next - 1,
-                    hasNext: newState.hasNext,
+                    ...prevState,
+                    current:
+                      prevState.current > 1
+                        ? prevState.current - 1
+                        : prevState.current,
+                    hasPrev: prevState.current > 1 ? true : false,
                   };
                 });
-                SearchUser(search, true, true);
               }}
-              onNextClick={() => {
-                SearchUser(search, true, false);
+              onNextClick={async () => {
+                await setUserPagination((prevState) => {
+                  return {
+                    ...prevState,
+                    current: prevState.current + 1,
+                  };
+                });
+                SearchUser(search, true);
               }}
             />
           </>
@@ -319,8 +283,11 @@ const App = () => {
         {showRepositories && (
           <Repositries
             repositoriesList={repositoriesList}
-            onClick={handleRepoClick}
+            onClick={(repo) => handleRepoClick(repo, false)}
             repoPagination={repoPagination}
+            setRepoPagination={setRepoPagination}
+            selectedUser={selectedUser}
+            handleUserCardClick={handleUserCardClick}
           />
         )}
         {repo && (
@@ -330,6 +297,8 @@ const App = () => {
             setRepo={setRepo}
             setShowRepositories={setShowRepositories}
             issuePagination={issuePagination}
+            handleRepoClick={handleRepoClick}
+            setIssuePagination={setIssuePagination}
           />
         )}
       </div>

@@ -12,7 +12,7 @@ const Paginator = ({
 }) => {
   return (
     <Pagination className="d-flex align-self-center">
-      <Pagination.Prev disabled={hasPrev} onClick={onPrevClick} />
+      <Pagination.Prev disabled={!hasPrev} onClick={onPrevClick} />
       <Pagination.Item>{current}</Pagination.Item>
       <Pagination.Next disabled={!hasNext} onClick={onNextClick} />
     </Pagination>

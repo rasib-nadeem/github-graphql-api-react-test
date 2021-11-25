@@ -1,7 +1,14 @@
 import React from "react";
 import { Label, RepositoryListItem, Paginator } from "..";
 
-const Repositries = ({ repositoriesList, onClick, repoPagination }) => {
+const Repositries = ({
+  repositoriesList,
+  onClick,
+  repoPagination,
+  setRepoPagination,
+  handleUserCardClick,
+  selectedUser,
+}) => {
   return (
     <>
       <Label title="Repositories" />
@@ -12,24 +19,45 @@ const Repositries = ({ repositoriesList, onClick, repoPagination }) => {
           No Repositories
         </h3>
       ) : (
-        repositoriesList.map((item) => {
-          return (
-            <RepositoryListItem
-              key={item.id}
-              name={item.name}
-              stars={item.stargazerCount}
-              watching={item.watchers.nodes.length}
-              onClick={() => onClick(item)}
-            />
-          );
-        })
+        repositoriesList
+          .slice((repoPagination.current - 1) * 5, repoPagination.current * 5)
+          .map((item) => {
+            return (
+              <RepositoryListItem
+                key={item.id}
+                name={item.name}
+                stars={item.stargazerCount}
+                watching={item.watchers.nodes.length}
+                onClick={() => onClick(item)}
+              />
+            );
+          })
       )}
       <Paginator
         hasNext={repoPagination?.hasNext}
         hasPrev={repoPagination?.hasPrev}
         current={repoPagination?.current}
-        prev={repoPagination?.prev}
-        next={repoPagination?.next}
+        onPrevClick={async () => {
+          await setRepoPagination((prevState) => {
+            return {
+              ...prevState,
+              current:
+                prevState.current > 1
+                  ? prevState.current - 1
+                  : prevState.current,
+              hasPrev: prevState.current > 1 ? true : false,
+            };
+          });
+        }}
+        onNextClick={async () => {
+          await setRepoPagination((prevState) => {
+            return {
+              ...prevState,
+              current: prevState.current + 1,
+            };
+          });
+          handleUserCardClick(selectedUser, true);
+        }}
       />
     </>
   );
