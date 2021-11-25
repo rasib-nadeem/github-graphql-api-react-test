@@ -8,7 +8,7 @@ import { AddIssueModal, IssuesListItem, Label, RepositoryListItem } from "..";
 import "./styles.css";
 
 const Issues = ({ issues, selectedRepo, setRepo, setShowRepositories }) => {
-  const [createIssue, { data }] = useMutation(CreateIssueQuery);
+  const [createIssue] = useMutation(CreateIssueQuery);
   const [visible, setVisible] = useState(false);
   const [title, setTitle] = useState();
   const [description, setDescription] = useState();
