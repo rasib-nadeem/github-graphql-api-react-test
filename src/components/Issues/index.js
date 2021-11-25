@@ -4,10 +4,22 @@ import { Button } from "react-bootstrap";
 import { useMutation } from "@apollo/client";
 import { CreateIssueQuery } from "../../graphql/Queries";
 
-import { AddIssueModal, IssuesListItem, Label, RepositoryListItem } from "..";
+import {
+  AddIssueModal,
+  IssuesListItem,
+  Label,
+  RepositoryListItem,
+  Paginator,
+} from "..";
 import "./styles.css";
 
-const Issues = ({ issues, selectedRepo, setRepo, setShowRepositories }) => {
+const Issues = ({
+  issues,
+  selectedRepo,
+  setRepo,
+  setShowRepositories,
+  issuePagination,
+}) => {
   const [createIssue] = useMutation(CreateIssueQuery);
   const [visible, setVisible] = useState(false);
   const [title, setTitle] = useState();
@@ -93,6 +105,13 @@ const Issues = ({ issues, selectedRepo, setRepo, setShowRepositories }) => {
         onCreate={handleCreateIssue}
         showError={showError}
         error={error}
+      />
+      <Paginator
+        hasNext={issuePagination?.hasNext}
+        hasPrev={issuePagination?.hasPrev}
+        current={issuePagination?.current}
+        prev={issuePagination?.prev}
+        next={issuePagination?.next}
       />
     </>
   );

@@ -9,6 +9,7 @@ import AddIssueModal from "./AddIssueModal";
 import Repositries from "./Repositories";
 import Issues from "./Issues";
 import ActivityIndicator from "./ActivityIndicator";
+import GithubAccessToken from "./GithubAccessTokenModal.js";
 
 export {
   InputField,
@@ -21,5 +22,6 @@ export {
   AddIssueModal,
   Repositries,
   Issues,
+  GithubAccessToken,
   ActivityIndicator,
 };

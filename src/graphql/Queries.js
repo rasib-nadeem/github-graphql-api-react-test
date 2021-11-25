@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const SearchUsersQuery = gql`
-  query MyQuery($name: String!) {
-    search(query: $name, type: USER, first: 10) {
+  query MyQuery($name: String!, $first: Int!) {
+    search(query: $name, type: USER, first: $first) {
       nodes {
         ... on User {
           id
@@ -12,6 +12,8 @@ export const SearchUsersQuery = gql`
       }
       pageInfo {
         hasNextPage
+        startCursor
+        endCursor
       }
     }
   }
@@ -29,10 +31,10 @@ export const CreateIssueQuery = gql`
 `;
 
 export const GetRepoIssuesQuery = gql`
-  query getIssues($repoName: String!, $ownerName: String!) {
+  query getIssues($repoName: String!, $ownerName: String!, $first: Int!) {
     repository(name: $repoName, owner: $ownerName) {
       id
-      issues(first: 10, states: OPEN) {
+      issues(first: $first, states: OPEN) {
         nodes {
           id
           title
@@ -40,6 +42,8 @@ export const GetRepoIssuesQuery = gql`
         }
         pageInfo {
           hasNextPage
+          startCursor
+          endCursor
         }
       }
     }
@@ -47,19 +51,27 @@ export const GetRepoIssuesQuery = gql`
 `;
 
 export const GetUserRepos = gql`
-  query getRepos($ownerName: String!) {
+  query getRepos($ownerName: String!, $first: Int!) {
     user(login: $ownerName) {
-      repositories(first: 10, orderBy: { field: CREATED_AT, direction: ASC }) {
+      repositories(
+        first: $first
+        orderBy: { field: CREATED_AT, direction: ASC }
+      ) {
         nodes {
           id
           name
           stargazerCount
-          watchers(first: 10) {
+          watchers(first: 5) {
             nodes {
               id
               name
             }
           }
+        }
+        pageInfo {
+          hasNextPage
+          startCursor
+          endCursor
         }
       }
     }

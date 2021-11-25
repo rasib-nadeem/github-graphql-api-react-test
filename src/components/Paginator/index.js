@@ -2,6 +2,7 @@ import React from "react";
 import { Pagination } from "react-bootstrap";
 
 const Paginator = ({
+  hasPrev,
   prev,
   current,
   next,
@@ -10,11 +11,9 @@ const Paginator = ({
   onNextClick,
 }) => {
   return (
-    <Pagination>
-      <Pagination.Prev onClick={onPrevClick} />
-      {current !== 1 && <Pagination.Item>{prev}</Pagination.Item>}
+    <Pagination className="d-flex align-self-center">
+      <Pagination.Prev disabled={hasPrev} onClick={onPrevClick} />
       <Pagination.Item>{current}</Pagination.Item>
-      {hasNext && <Pagination.Item>{next}</Pagination.Item>}
       <Pagination.Next disabled={!hasNext} onClick={onNextClick} />
     </Pagination>
   );

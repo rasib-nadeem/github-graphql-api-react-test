@@ -1,7 +1,7 @@
 import React from "react";
-import { Label, RepositoryListItem } from "..";
+import { Label, RepositoryListItem, Paginator } from "..";
 
-const Repositries = ({ repositoriesList, onClick }) => {
+const Repositries = ({ repositoriesList, onClick, repoPagination }) => {
   return (
     <>
       <Label title="Repositories" />
@@ -24,6 +24,13 @@ const Repositries = ({ repositoriesList, onClick }) => {
           );
         })
       )}
+      <Paginator
+        hasNext={repoPagination?.hasNext}
+        hasPrev={repoPagination?.hasPrev}
+        current={repoPagination?.current}
+        prev={repoPagination?.prev}
+        next={repoPagination?.next}
+      />
     </>
   );
 };
